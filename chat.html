@@ -171,11 +171,12 @@ button:active{transform:scale(.97)}
 
 <div id="boot">
   <div class="bootbox">
-    <div class="boottitle">正在下载切片（chunk）环境</div>
+    <div class="boottitle">正在准备本地检索环境</div>
     <p class="bootsub">检索全部在你的浏览器里完成。首次打开需要下载一次，之后会缓存，再打开就直接进入。</p>
     <div id="bootrows"></div>
     <p class="bootnote">
-      下载的是<b>嵌入模型</b>和<b>语料向量</b>，约 <b>32 MB</b>，来自本站自己的服务器，不经第三方。<br>
+      推理引擎、计算内核、嵌入模型、语料向量加起来<b>约 33 MB</b>（服务器会压缩传输），
+      全部来自本站，<b>不经任何第三方 CDN</b>。<br>
       装好之后，<b>你问的每一句话都是在这台机器上完成检索的</b>，只有最后生成回答时才联网。
     </p>
     <p class="booterr" id="booterr"></p>
@@ -202,7 +203,7 @@ button:active{transform:scale(.97)}
     <div id="feed"><div class="flow" id="flow"></div></div>
     <div id="bar">
       <div class="composer">
-        <textarea id="msg" rows="1" placeholder="说点什么，Enter 送出，Shift+Enter 换行"></textarea>
+        <textarea id="msg" rows="1" placeholder="对Ta说点什么…（Enter 送出，Shift+Enter 换行）"></textarea>
         <button id="send">送出</button>
       </div>
       <div class="hintline" id="hintline"></div>
@@ -249,7 +250,14 @@ function note(t,isErr){var d=document.createElement('div');d.className='note'+(i
   d.style.maxWidth='680px';d.style.margin='0 auto';d.textContent=t;FLOW.appendChild(d);down();}
 
 /* ══════════ 首次加载：进度面板 ══════════ */
-var ROWS=[['lib','推理库'],['model','切片（chunk）模型'],['vectors','语料向量'],['texts','段落文本']];
+/* 五行，每一字节都有归属：
+   lib     推理引擎  transformers.js
+   ort     计算内核  ONNX Runtime 的 WASM（20.6MB 解压，压缩后 4.2MB）
+   model   嵌入模型  bge-small-zh 把文字转成向量（"切片/chunk"是分块步骤，不是模型名）
+   vectors 语料向量  预计算好的 512 维向量
+   texts   段落文本  检索命中后要显示的原文 */
+var ROWS=[['lib','推理引擎'],['ort','计算内核'],['model','嵌入模型'],
+          ['vectors','语料向量'],['texts','段落文本']];
 var bootBox=document.getElementById('boot');
 document.getElementById('bootrows').innerHTML=ROWS.map(function(r){
   return '<div class="bootrow" data-k="'+r[0]+'"><div class="boothead"><span class="n">'+r[1]+
@@ -265,7 +273,7 @@ function onStage(s){
     return;
   }
   if(!row)return;
-  var prev=['lib','model','vectors','texts'],idx=prev.indexOf(s.stage);
+  var prev=['lib','ort','model','vectors','texts'],idx=prev.indexOf(s.stage);
   prev.forEach(function(k,i){ if(i<idx){var r=document.querySelector('.bootrow[data-k="'+k+'"]');
     if(r&&!r.classList.contains('done')){r.classList.add('done');
       r.querySelector('.bootbar i').style.transform='scaleX(1)';
@@ -535,7 +543,7 @@ function autoGrow(){MSG.style.height='auto';MSG.style.height=Math.min(MSG.scroll
 
     await refreshQuota();
     var p=await personaOf(current); intro(p); note('对话从这里开始。检索在你本机完成。');
-    MSG.placeholder='对'+current+'说点什么…';
+    MSG.placeholder='对Ta说点什么…';
     MSG.addEventListener('input',autoGrow);
     MSG.addEventListener('keydown',function(e){
       if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});

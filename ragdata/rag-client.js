@@ -79,6 +79,25 @@ async function cachedFetch(url, onProgress) {
   return buf;
 }
 
+/** 普通 fetch + 进度回调。写进浏览器 HTTP 缓存（不是 Cache API），
+ *  这样 ONNX Runtime 之后自己加载同一文件时能直接命中缓存。 */
+async function warm(url, onProgress) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const total = Number(resp.headers.get('Content-Length')) || 0;
+    if (!onProgress || !total || !resp.body) { await resp.arrayBuffer(); return; }
+    const reader = resp.body.getReader();
+    let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      got += value.length;
+      onProgress(got, total);
+    }
+  } catch (e) { /* 预取失败不影响流程，ORT 之后会自己再试 */ }
+}
+
 async function loadLib() {
   const tried = [];
   let lastErr = null;
@@ -110,7 +129,17 @@ export async function init(onStage) {
 
   const T = await loadLib();
 
-  say('model', '下载切片（chunk）模型');
+  /* 先把 ONNX Runtime 的 WASM 自己拉下来。
+     不这么做的话，它会藏在 pipeline() 里偷偷下载（4.2 MB 传输 / 20.6 MB 解压），
+     进度条上完全看不见 —— 而它是第三大的下载项。
+     用普通 fetch（不是 Cache API）：这样会进浏览器 HTTP 缓存，
+     ORT 之后自己加载时直接命中，不会重复下载。 */
+  const ortMjs = DATA + 'lib/ort-wasm-simd-threaded.jsep.mjs';
+  const ortWasm = DATA + 'lib/ort-wasm-simd-threaded.jsep.wasm';
+  await warm(ortMjs, (l, t) => say('ort', '下载计算内核', l, t));
+  await warm(ortWasm, (l, t) => say('ort', '下载计算内核', l, t));
+
+  say('model', '下载嵌入模型');
   // 模型只从本站拿（HF 主站国内打不开），所以关掉远程、打开本地
   T.env.allowRemoteModels = false;
   T.env.allowLocalModels = true;
