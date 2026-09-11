@@ -13,6 +13,10 @@
   --line:#262b33; --line-2:#363c46;
   --ink:#eceff4; --ink-2:#a2abba; --ink-3:#7d8796;
   --accent:#5ec8d8; --accent-soft:rgba(94,200,216,.14);
+  /* 相近色：比强调色更浅的青色，专给「问题」用 —— 和步骤标签的青色拉开一档 */
+  --q:#8fdcea; --q-bg:rgba(94,200,216,.17); --q-line:rgba(94,200,216,.36);
+  /* 最亮的一档，给问题正文和回答（内容层）*/
+  --ink-hi:#f5f8fb;
   --ui:"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --t-meta:12px; --t-label:15px; --t-body:19px; --t-lead:24px; --t-title:30px;
@@ -40,17 +44,17 @@ h1{font-size:var(--t-title);font-weight:700;line-height:1.25;margin:0;letter-spa
 h1 em{font-style:normal;color:var(--accent)}
 .topmeta{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);letter-spacing:.04em}
 .lede{font-size:var(--t-body);line-height:1.9;color:var(--ink-2);margin:0 0 44px;max-width:34em}
-.lede b{color:var(--ink);font-weight:600}
+.lede b{color:var(--ink-hi);font-weight:600;font-size:20px}
 
 /* ── 工作流程：浮起来的卡片 ── */
 .flowwrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   padding:28px 30px 24px;box-shadow:var(--sh-2);margin-bottom:16px}
-.flowlab{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
-  letter-spacing:.1em;display:block;margin-bottom:22px}
+.flowlab{font-size:var(--t-label);color:var(--ink-2);
+  letter-spacing:.08em;display:block;margin-bottom:22px}
 #flow{display:block;width:100%;height:auto}
 #flow .bx{fill:var(--surface-2);stroke:var(--line-2);stroke-width:1}
 #flow .bx.hi{fill:var(--accent-soft);stroke:var(--accent)}
-#flow .bt{fill:var(--ink-2);font-size:12.5px;font-family:var(--ui);text-anchor:middle}
+#flow .bt{fill:var(--ink-2);font-size:var(--t-meta);font-family:var(--ui);text-anchor:middle}
 #flow .bt.hi{fill:var(--accent)}
 #flow .ln{stroke:var(--line-2);stroke-width:1;fill:none}
 .flowcap{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
@@ -76,28 +80,32 @@ section{margin-bottom:96px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   overflow:hidden;box-shadow:var(--sh-2)}
 .cardtop{padding:28px 30px 24px}
-.dname{font-size:var(--t-lead);font-weight:700;line-height:1.3}
-.dtitle{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
-  margin-top:9px;letter-spacing:.04em}
+.dname{font-size:var(--t-lead);font-weight:700;line-height:1.3;color:var(--ink-hi)}
+/* 头衔用「相近色」——和问题徽章同一档，让结构标记在整页里是同一个语气 */
+.dtitle{font-size:var(--t-label);color:var(--q);margin-top:10px;letter-spacing:.02em}
 .persona{font-size:var(--t-body);line-height:1.9;color:var(--ink-2);margin:22px 0 0;max-width:34em}
 .volrow{display:flex;align-items:center;gap:16px;padding:20px 30px;
   border-top:1px solid var(--line)}
 .volrow .k{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);flex:none;width:82px}
 .volrow .bar{flex:1;height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden}
 .volrow .bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
-.volrow .v{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-2);flex:none;width:56px;text-align:right}
+.volrow .v{font-size:var(--t-label);font-weight:600;color:var(--q);flex:none;width:64px;text-align:right}
 .dmeta{padding:20px 30px 26px;font-size:var(--t-label);line-height:1.9;color:var(--ink-3);
   border-top:1px solid var(--line)}
 .dmeta em{font-style:normal;color:var(--ink-2);font-weight:500}
 
 /* ── 每一轮 ── */
 .turn{padding:40px 0 0}
-.ask{display:flex;gap:14px;align-items:baseline;margin:0 0 30px;
-  padding:18px 22px;background:var(--surface);border:1px solid var(--line);
+.ask{display:flex;gap:18px;align-items:center;margin:0 0 34px;
+  padding:20px 24px;background:var(--surface);border:1px solid var(--line);
   border-radius:var(--r-md);box-shadow:var(--sh-1)}
-.ask i{font-style:normal;font-size:var(--t-meta);font-family:var(--mono);color:var(--accent);
-  flex:none;letter-spacing:.1em}
-.ask span{font-size:var(--t-body);line-height:1.7;font-weight:500}
+/* 「问题 N」做成胶囊徽章：内容层的入口标记，比步骤标签亮一档 */
+.qno{flex:none;font:600 var(--t-label)/1 var(--mono);font-style:normal;
+  color:var(--q);background:var(--q-bg);border:1px solid var(--q-line);
+  border-radius:999px;padding:8px 15px;letter-spacing:.05em;white-space:nowrap}
+/* 问题正文：整页最大的一档正文，最亮的颜色 —— 一眼看到"在问什么" */
+.qtext{font-size:var(--t-lead);line-height:1.5;font-weight:600;color:var(--ink-hi);
+  letter-spacing:.005em}
 
 .steps{position:relative;padding-left:28px}
 .steps::before{content:"";position:absolute;left:5px;top:10px;bottom:14px;width:1px;background:var(--line-2)}
@@ -106,8 +114,8 @@ section{margin-bottom:96px}
   border-radius:50%;background:var(--bg);border:1.5px solid var(--line-2)}
 .step.hi::before{border-color:var(--accent);background:var(--accent)}
 .slabel{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-.slabel b{font-weight:600;font-size:var(--t-label);color:var(--ink)}
-.step.hi .slabel b{color:var(--accent)}
+.slabel b{font-weight:600;font-size:var(--t-label);color:var(--ink-2)}
+.step.hi .slabel b{color:var(--accent);font-size:var(--t-body);letter-spacing:.01em}
 .slabel em{font-style:normal;font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3)}
 
 .rewrite{font-size:var(--t-label);line-height:1.8;color:var(--ink-2)}
@@ -126,7 +134,7 @@ table.hits td.n{width:58px;font-family:var(--mono);font-size:var(--t-meta);color
 table.hits td.g{width:124px;padding-top:18px}
 .sim{display:block;height:7px;background:var(--surface-2);border-radius:999px;overflow:hidden}
 .sim i{display:block;height:100%;background:var(--accent);border-radius:999px}
-.reply{font-size:var(--t-body);line-height:1.9;white-space:pre-wrap;color:var(--ink)}
+.reply{font-size:var(--t-body);line-height:1.92;white-space:pre-wrap;color:var(--ink-hi)}
 .dataline{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
   margin-top:14px;line-height:1.8}
 
@@ -136,7 +144,9 @@ table.hits td.g{width:124px;padding-top:18px}
   padding:24px 26px;box-shadow:var(--sh-1)}
 .cross:last-child:nth-child(odd){grid-column:1 / -1}
 .cross .cn{display:flex;align-items:baseline;gap:11px;margin-bottom:14px}
-.cross .cn b{font-weight:700;font-size:var(--t-label);color:var(--accent);letter-spacing:.02em}
+.cross .cn b{font-weight:600;font-size:var(--t-label);color:var(--q);
+  background:var(--q-bg);border:1px solid var(--q-line);border-radius:999px;
+  padding:6px 13px;letter-spacing:.05em}
 .cross .cn u{text-decoration:none;font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3)}
 .cross p{margin:0;font-size:var(--t-label);line-height:1.9;color:var(--ink-2)}
 
@@ -225,9 +235,10 @@ else{
     h+='<div class="dmeta"><em>说话风格</em>　'+esc(c.style)+'<br><em>时间线边界</em>　'+esc(c.cutoff)+'</div>';
     h+='</div>';
 
-    c.turns.forEach(function(t){
+    c.turns.forEach(function(t,ti){
       var rw=t.query&&t.query!==t.user;
-      h+='<div class="turn"><p class="ask"><i>问</i><span>'+esc(t.user)+'</span></p>';
+      h+='<div class="turn"><p class="ask"><i class="qno">问题 '+(ti+1)+'</i>'+
+         '<span class="qtext">'+esc(t.user)+'</span></p>';
       h+='<div class="steps">';
       /* ① 改写问题 */
       h+='<div class="step'+(rw?' hi':'')+'"><div class="slabel"><b>改写问题</b><em>'+
