@@ -40,14 +40,17 @@ Write-Host "== 5/5 check ==" -ForegroundColor Cyan
 $need = @('index.html','chat.html','char_demo.js','ragdata\rag-client.js','ragdata\manifest.json',
           'ragdata\vectors.bin','ragdata\chunks.json','ragdata\personas.json',
           'ragdata\models\bge-small-zh-v1.5\onnx\model_quantized.onnx',
-          'ragdata\ort\ort-wasm-simd-threaded.jsep.wasm','fonts\noto-sans-sc.css')
+          'ragdata\lib\transformers.min.js',
+          'ragdata\lib\ort-wasm-simd-threaded.jsep.mjs',
+          'ragdata\lib\ort-wasm-simd-threaded.jsep.wasm',
+          'fonts\noto-sans-sc.css')
 $bad = 0
 foreach ($f in $need) {
     $p = Join-Path $ROOT $f
     if (Test-Path $p) { Write-Host ("   OK       {0,-56} {1,9:N1} KB" -f $f, ((Get-Item $p).Length/1KB)) }
     else { Write-Host ("   MISSING  {0}" -f $f) -ForegroundColor Red; $bad++ }
 }
-$tot = [math]::Round(((Get-ChildItem $ROOT -Recurse -File | Where-Object { $_.FullName -notmatch '\\\.git\\' } | Measure-Object Length -Sum).Sum/1MB),2)
+$tot = [math]::Round(((Get-ChildItem $ROOT -Recurse -File | Where-Object { $_.FullName -notmatch '\\\.git\\|\\dist\\|\\\.wrangler\\' } | Measure-Object Length -Sum).Sum/1MB),2)
 Write-Host ""
 Write-Host "repo total: $tot MB" -ForegroundColor Green
 if ($bad -gt 0) { exit 1 }

@@ -12,13 +12,20 @@
  *   - 角色台词只在该角色的向量里检索，取前 4 条
  *   - 剧情检索取前 3 块，再做相邻块扩展（前后各 1 块），去重后约 8 块
  * ============================================================ */
-const CDNS = [
+/* 推理库优先用【本站自托管】的那份。
+   之前依赖 CDN，网络一抖就整个打不开 —— 而且实测 ORT 的 WASM 也会
+   跟着去 CDN 拿，等于把两个最关键的依赖都押在第三方上。
+   自托管后，除了最后生成回答，整个页面不再请求任何外部域名。 */
+const CDNS = [   // 仅当自托管那份缺失时的兜底
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.5',
-  'https://registry.npmmirror.com/@huggingface/transformers/3.7.5/files/dist/transformers.min.js',
-  'https://unpkg.com/@huggingface/transformers@3.7.5',
 ];
 const MODEL_ID = 'bge-small-zh-v1.5';
-const DATA = './ragdata/';
+/* 资源根目录。用 import.meta.url 推导成【绝对 URL】：
+   - fetch() 相对的是页面
+   - dynamic import() 相对的是本模块
+   - ONNX Runtime 解析 wasmPaths 又是另一套规则
+   只有绝对 URL 能同时满足这三者，也才能兼容 GitHub Pages 的 /santi-chat/ 子路径。 */
+const DATA = new URL('./', import.meta.url).href;
 const VOICE_K = 4;
 const PLOT_K = 3;
 const NEIGHBOR_WINDOW = 1;
@@ -73,16 +80,24 @@ async function cachedFetch(url, onProgress) {
 }
 
 async function loadLib() {
+  const tried = [];
   let lastErr = null;
+  // 先试自托管。
+  // 注意：import() 的相对路径是【相对本模块】解析的，而 fetch() 是相对页面 ——
+  // 用 DATA 拼会变成 /ragdata/ragdata/... 。用 import.meta.url 才两边都对，
+  // 也能兼容 GitHub Pages 的 /santi-chat/ 子路径。
+  try {
+    const mod = await import(/* @vite-ignore */ DATA + 'lib/transformers.min.js');
+    if (mod && mod.pipeline) return mod;
+  } catch (e) { lastErr = e; tried.push('本站'); }
+  // 兜底才走 CDN
   for (const base of CDNS) {
     try {
-      const url = base.includes('/files/') || base.endsWith('.js') ? base
-                : base + '/dist/transformers.min.js';
-      const mod = await import(/* @vite-ignore */ url);
+      const mod = await import(/* @vite-ignore */ base + '/dist/transformers.min.js');
       if (mod && mod.pipeline) return mod;
-    } catch (e) { lastErr = e; }
+    } catch (e) { lastErr = e; tried.push(base.replace(/^https?:\/\//, '').split('/')[0]); }
   }
-  throw new Error('无法加载推理库（尝试了 ' + CDNS.length + ' 个 CDN）：' + (lastErr && lastErr.message));
+  throw new Error('无法加载推理库（试过：' + tried.join('、') + '）：' + (lastErr && lastErr.message));
 }
 
 /* ---------- 初始化 ---------- */
@@ -91,8 +106,8 @@ export async function init(onStage) {
 
   say('manifest', '读取清单');
   MANIFEST = await (await fetch(DATA + 'manifest.json', { cache: 'no-cache' })).json();
-
   say('lib', '加载推理库');
+
   const T = await loadLib();
 
   say('model', '下载切片（chunk）模型');
@@ -101,18 +116,16 @@ export async function init(onStage) {
   T.env.allowLocalModels = true;
   T.env.localModelPath = DATA + 'models/';
   T.env.useBrowserCache = true;
-  // ONNX Runtime 的 WASM 走自托管，避免运行时依赖 CDN
+  /* ONNX Runtime 的 WASM 就放在 lib/ 里（跟 transformers.min.js 同目录）——
+     ORT 默认就是去 bundle 所在目录找这两个文件，把文件放对位置
+     比覆盖 wasmPaths 更省事，也实测覆盖不生效。
+     这样一来，除了最后生成回答，整个页面不再请求任何外部域名。 */
   if (T.env.backends && T.env.backends.onnx && T.env.backends.onnx.wasm) {
     const w = T.env.backends.onnx.wasm;
-    // wasmPaths 传字符串只改 .wasm 的地址，.mjs 加载器仍会去 CDN 拿。
-    // 传对象可以逐个文件名指定，这样加载器和二进制都走本站。
-    const J = DATA + 'ort/ort-wasm-simd-threaded.jsep';
-    w.wasmPaths = {
-      'ort-wasm-simd-threaded.jsep.mjs': J + '.mjs',
-      'ort-wasm-simd-threaded.jsep.wasm': J + '.wasm',
-      'ort-wasm-simd-threaded.mjs': J + '.mjs',
-      'ort-wasm-simd-threaded.wasm': J + '.wasm',
-    };
+    /* 必须显式设置：transformers.js 内部有一句
+         wasmPaths || (wasmPaths = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@<ver>/dist/")
+       也就是【不设就硬编码走 CDN】。传字符串前缀即可，文件就放在 lib/ 里。 */
+    w.wasmPaths = DATA + 'lib/';
     // 关键：锁成单线程、不用 proxy worker。
     // 多线程模式下 ORT 会起 SharedArrayBuffer worker，
     // 在缺少跨源隔离头（COOP/COEP）的页面里会静默死锁 —— 表现为"会话创建永不返回"。
