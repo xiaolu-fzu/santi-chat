@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>《三体》人物对话</title>
+<link rel="stylesheet" href="fonts/noto-sans-sc.css">
+<link rel="stylesheet" href="fonts/jetbrains-mono.css">
+<style>
+:root{
+  --bg:#08090b; --surface:#15181e; --surface-2:#1d2129;
+  --line:#262b33; --line-2:#363c46;
+  --ink:#eceff4; --ink-2:#a2abba; --ink-3:#7d8796;
+  --accent:#5ec8d8; --accent-soft:rgba(94,200,216,.14);
+  --ui:"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --t-meta:12px; --t-label:15px; --t-body:19px; --t-lead:24px;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --sh-1:0 2px 6px rgba(0,4,10,.5);
+  --sh-2:0 10px 28px rgba(0,4,10,.45);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:400 var(--t-body)/1.8 var(--ui);-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent-soft)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:var(--r-sm)}
+*::-webkit-scrollbar{width:11px;height:11px}
+*::-webkit-scrollbar-thumb{background:#2f353f;border-radius:6px}
+
+/* ── 首次加载遮罩 ── */
+#boot{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;
+  align-items:center;justify-content:center;padding:28px;transition:opacity .5s}
+#boot.gone{opacity:0;pointer-events:none}
+.bootbox{width:100%;max-width:520px}
+.boottitle{font-size:var(--t-lead);font-weight:700;margin-bottom:10px}
+.bootsub{font-size:var(--t-label);color:var(--ink-2);line-height:1.9;margin:0 0 34px}
+.bootrow{margin-bottom:20px}
+.boothead{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:var(--t-meta);font-family:var(--mono);margin-bottom:9px}
+.boothead .n{color:var(--ink-2)}
+.boothead .v{color:var(--ink-3)}
+.bootrow.active .boothead .n{color:var(--accent)}
+.bootrow.done .boothead .n{color:var(--ink-2)}
+.bootbar{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.bootbar i{display:block;height:100%;width:100%;background:var(--accent);
+  border-radius:999px;transform:scaleX(0);transform-origin:left;
+  transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.bootrow.done .bootbar i{background:var(--line-2)}
+.bootnote{margin-top:34px;font-size:var(--t-meta);line-height:2;color:var(--ink-3);
+  border-top:1px solid var(--line);padding-top:20px}
+.bootnote b{color:var(--ink-2);font-weight:500}
+.booterr{margin-top:22px;font-size:var(--t-label);line-height:1.9;color:#e8827a;display:none}
+
+/* ── 外壳 ── */
+.shell{display:grid;grid-template-columns:308px 1fr;height:100vh}
+.rail{background:var(--surface);border-right:1px solid var(--line);
+  padding:28px 22px;display:flex;flex-direction:column;gap:22px;overflow:hidden;min-height:0}
+.main{display:flex;flex-direction:column;min-width:0}
+.brand{font:700 var(--t-label)/1.5 var(--ui)}
+.brand span{display:block;font:400 var(--t-meta)/1.8 var(--ui);color:var(--ink-3);margin-top:7px}
+.dlabel{font:500 var(--t-meta)/1 var(--mono);color:var(--ink-3);letter-spacing:.1em;
+  display:block;margin-bottom:11px}
+.drow{border-top:1px solid var(--line);padding-top:18px}
+.drow:first-child{border-top:0;padding-top:0}
+#castwrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px}
+#cast{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px;
+  margin:0 -6px;padding:0 6px}
+.cast{background:none;border:0;border-radius:var(--r-sm);color:var(--ink-2);
+  height:auto;padding:11px 14px;text-align:left;display:flex;justify-content:space-between;
+  gap:12px;font:500 var(--t-label)/1.3 var(--ui);cursor:pointer;
+  transition:background .16s,color .16s,transform .1s}
+.cast em{font:400 var(--t-meta)/1.3 var(--mono);color:var(--ink-3);font-style:normal;padding-top:2px}
+.cast:hover{background:var(--surface-2);color:var(--ink)}
+.cast:active{transform:scale(.985)}
+.cast[aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}
+.cast[aria-pressed=true] em{color:var(--accent)}
+.cast .lock{color:var(--ink-3);font-size:var(--t-meta);padding-top:2px}
+.cast .lock.free{color:var(--accent)}
+input,button,textarea{font-family:inherit}
+input[type=text]{font:400 var(--t-label)/1 var(--ui);color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px}
+input::placeholder{color:var(--ink-3)}
+input:focus{border-color:var(--accent);outline:none}
+.pickrow{display:flex;gap:10px}
+.pickrow input{flex:1;min-width:0}
+button{font:600 var(--t-label)/1 var(--ui);color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--line-2);border-radius:var(--r-sm);padding:0 18px;height:44px;
+  cursor:pointer;transition:background .16s,border-color .16s,color .16s,transform .1s}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button:active{transform:scale(.97)}
+
+#feed{flex:1;overflow-y:auto;padding:48px 44px 24px}
+.flow{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:34px}
+.intro + .note{margin-top:-18px}
+.intro{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:26px 28px;box-shadow:var(--sh-2)}
+.iname{font-size:var(--t-lead);font-weight:700;line-height:1.3}
+.ipersona{font-size:var(--t-label);color:var(--ink-2);line-height:1.9;margin-top:14px}
+.istyle{font-size:var(--t-meta);color:var(--ink-3);line-height:1.85;margin-top:16px}
+.note{font:400 var(--t-meta)/1.85 var(--ui);color:var(--ink-3);margin:0}
+.note.err{color:#e8827a}
+.mine{align-self:flex-end;max-width:78%}
+.mine p{margin:0;font:400 var(--t-label)/1.8 var(--ui);color:var(--ink);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:15px 20px;box-shadow:var(--sh-1)}
+.said{display:flex;flex-direction:column;gap:13px}
+.who{font:500 var(--t-meta)/1 var(--mono);color:var(--accent);letter-spacing:.12em}
+.line{font:400 var(--t-body)/1.95 var(--ui);white-space:pre-wrap;color:var(--ink)}
+.line.pending{color:var(--ink-3)}
+.line.pending::after{content:"";display:inline-block;width:8px;height:17px;margin-left:4px;
+  background:var(--accent);border-radius:2px;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.beat{animation:rise .3s cubic-bezier(.16,1,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.beat{animation:none}.line.pending::after{animation:none}}
+.trace{margin-top:8px}
+.ttoggle{background:none;border:0;height:auto;padding:0;color:var(--ink-3);
+  font:400 var(--t-meta)/1.7 var(--ui);cursor:pointer}
+.ttoggle:hover{color:var(--accent)}
+.ttoggle::after{content:" ＋"}
+.trace.on .ttoggle::after{content:" －"}
+.trace.on .ttoggle{color:var(--accent)}
+.tbody{display:none;margin-top:14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:20px 22px;box-shadow:var(--sh-1)}
+.trace.on .tbody{display:block}
+.tl{font:500 var(--t-meta)/1 var(--mono);color:var(--ink-3);letter-spacing:.08em;
+  display:block;margin:0 0 11px}
+.tq{font:600 var(--t-label)/1.7 var(--ui);color:var(--accent);margin-bottom:20px}
+.trow{display:flex;gap:14px;font:400 var(--t-label)/1.75 var(--ui);color:var(--ink-2);padding:5px 0}
+.trow b{font:400 var(--t-meta)/1.75 var(--mono);color:var(--ink-3);flex:none;padding-top:3px}
+.tfoot{margin-top:16px;font:400 var(--t-meta)/1.8 var(--mono);color:var(--ink-3)}
+
+#bar{border-top:1px solid var(--line);padding:20px 44px 24px;background:var(--surface)}
+.composer{max-width:680px;margin:0 auto;display:flex;gap:12px;align-items:flex-end}
+#msg{flex:1;font:400 var(--t-body)/1.75 var(--ui);color:var(--ink);caret-color:var(--accent);
+  background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--r-md);
+  padding:17px 19px;resize:none;min-height:62px;max-height:200px;outline:none}
+#msg::placeholder{color:var(--ink-3);font-size:var(--t-label)}
+#msg:focus{border-color:var(--accent)}
+#send{height:62px;padding:0 28px;background:var(--accent);color:#06242a;border:0;
+  border-radius:var(--r-md);font-weight:700;box-shadow:0 6px 18px rgba(0,4,10,.55)}
+#send:hover:not(:disabled){background:#7ad6e4;color:#06242a;border:0}
+#send:disabled{opacity:.3;cursor:default;transform:none;box-shadow:none}
+.hintline{max-width:680px;margin:13px auto 0;font:400 var(--t-meta)/1.7 var(--ui);color:var(--ink-3)}
+
+.mask{position:fixed;inset:0;background:rgba(3,5,9,.8);display:flex;align-items:center;
+  justify-content:center;padding:26px;z-index:20;backdrop-filter:blur(3px)}
+.mask[hidden]{display:none}
+.dlg{width:100%;max-width:460px;background:var(--surface);border:1px solid var(--line-2);
+  border-radius:var(--r-lg);padding:32px 34px 26px;box-shadow:0 24px 64px rgba(0,4,10,.6);
+  animation:rise .24s cubic-bezier(.16,1,.3,1) both}
+.dt{font-size:var(--t-lead);font-weight:700;line-height:1.35;margin-bottom:16px}
+.db{font-size:var(--t-label);line-height:1.9;color:var(--ink-2);margin:0 0 14px}
+.dn{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);margin:0 0 24px;line-height:1.85}
+.da{display:flex;gap:12px;justify-content:flex-end}
+.da button{height:46px}
+.dprimary{background:var(--accent);color:#06242a;border-color:var(--accent);font-weight:700}
+.dprimary:hover{background:#7ad6e4;color:#06242a;border-color:#7ad6e4}
+
+@media (max-width:880px){
+  .shell{grid-template-columns:1fr;grid-template-rows:minmax(0,36vh) 1fr}
+  .rail{border-right:0;border-bottom:1px solid var(--line);padding:18px;gap:16px}
+  #feed{padding:26px 20px}
+  #bar{padding:14px 20px 18px}
+  .flow{gap:26px}
+}
+</style>
+</head>
+<body>
+
+<div id="boot">
+  <div class="bootbox">
+    <div class="boottitle">正在下载切片（chunk）环境</div>
+    <p class="bootsub">检索全部在你的浏览器里完成。首次打开需要下载一次，之后会缓存，再打开就直接进入。</p>
+    <div id="bootrows"></div>
+    <p class="bootnote">
+      下载的是<b>嵌入模型</b>和<b>语料向量</b>，约 <b>32 MB</b>，来自本站自己的服务器，不经第三方。<br>
+      装好之后，<b>你问的每一句话都是在这台机器上完成检索的</b>，只有最后生成回答时才联网。
+    </p>
+    <p class="booterr" id="booterr"></p>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">《三体》人物对话<span>角色扮演 RAG。检索本人在原著里说过的话，作为语气的依据。</span></div>
+    <div id="castwrap">
+      <span class="dlabel">书中人物</span>
+      <div id="cast"></div>
+    </div>
+    <div class="drow">
+      <span class="dlabel">换个人</span>
+      <div class="pickrow">
+        <input id="cname" list="roster" placeholder="角色名" autocomplete="off">
+        <datalist id="roster"></datalist>
+        <button id="cgo">切换</button>
+      </div>
+    </div>
+  </aside>
+  <main class="main">
+    <div id="feed"><div class="flow" id="flow"></div></div>
+    <div id="bar">
+      <div class="composer">
+        <textarea id="msg" rows="1" placeholder="说点什么，Enter 送出，Shift+Enter 换行"></textarea>
+        <button id="send">送出</button>
+      </div>
+      <div class="hintline" id="hintline"></div>
+    </div>
+  </main>
+</div>
+
+<div class="mask" id="mask2" hidden>
+  <div class="dlg" role="dialog" aria-modal="true">
+    <div class="dt">达到额度上限</div>
+    <p class="db" id="pmsg"></p>
+    <label class="dn" for="pcode" style="display:block;margin-bottom:6px">请输入口令</label>
+    <input id="pcode" type="text" autocomplete="off" placeholder="口令" style="width:100%;margin-bottom:6px">
+    <p class="dn" id="perr" style="color:#e8827a;min-height:18px;margin-bottom:14px"></p>
+    <div class="da"><button id="pno">取消</button><button class="dprimary" id="pyes">确认</button></div>
+  </div>
+</div>
+<div class="mask" id="mask" hidden>
+  <div class="dlg" role="dialog" aria-modal="true">
+    <div class="dt" id="dt"></div>
+    <p class="db" id="db"></p>
+    <p class="dn" id="dn"></p>
+    <div class="da"><button id="dno">先不用</button><button class="dprimary" id="dyes"></button></div>
+  </div>
+</div>
+
+<script type="module">
+
+import * as RAG from './ragdata/rag-client.js';
+
+/* 访客标识：服务端据此记额度（清缓存可重置，只防误触与随手刷） */
+var CLIENT=(function(){try{var k='santi_client',v=localStorage.getItem(k);
+  if(!v){v='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(k,v);}
+  return v;}catch(e){return 'anon';}})();
+
+var FLOW=document.getElementById('flow'),FEED=document.getElementById('feed');
+var MSG=document.getElementById('msg'),SEND=document.getElementById('send');
+var HINT=document.getElementById('hintline');
+var CAST=[],STATES={},HAS_CARD={},ROSTER={},QUOTA={unlimited:false,spent:0,unlock_limit:2,msgs:{},msg_limit:10};
+var current=null,turns=[],busy=false,PENDING=null,PENDING_SEND=null;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function down(){FEED.scrollTop=FEED.scrollHeight;}
+function note(t,isErr){var d=document.createElement('div');d.className='note'+(isErr?' err':'');
+  d.style.maxWidth='680px';d.style.margin='0 auto';d.textContent=t;FLOW.appendChild(d);down();}
+
+/* ══════════ 首次加载：进度面板 ══════════ */
+var ROWS=[['lib','推理库'],['model','切片（chunk）模型'],['vectors','语料向量'],['texts','段落文本']];
+var bootBox=document.getElementById('boot');
+document.getElementById('bootrows').innerHTML=ROWS.map(function(r){
+  return '<div class="bootrow" data-k="'+r[0]+'"><div class="boothead"><span class="n">'+r[1]+
+    '</span><span class="v"></span></div><div class="bootbar"><i></i></div></div>';}).join('');
+function fmt(b){return b>=1048576?(b/1048576).toFixed(1)+' MB':(b/1024).toFixed(0)+' KB';}
+function onStage(s){
+  var row=document.querySelector('.bootrow[data-k="'+s.stage+'"]');
+  if(s.stage==='ready'){
+    document.querySelectorAll('.bootrow').forEach(function(r){
+      r.classList.remove('active');r.classList.add('done');
+      r.querySelector('.bootbar i').style.transform='scaleX(1)';
+      r.querySelector('.boothead .v').textContent='完成';});
+    return;
+  }
+  if(!row)return;
+  var prev=['lib','model','vectors','texts'],idx=prev.indexOf(s.stage);
+  prev.forEach(function(k,i){ if(i<idx){var r=document.querySelector('.bootrow[data-k="'+k+'"]');
+    if(r&&!r.classList.contains('done')){r.classList.add('done');
+      r.querySelector('.bootbar i').style.transform='scaleX(1)';
+      r.querySelector('.boothead .v').textContent='完成';}}});
+  row.classList.add('active');
+  var pct=s.total?Math.min(1,s.loaded/s.total):0;
+  row.querySelector('.bootbar i').style.transform='scaleX('+pct+')';
+  row.querySelector('.boothead .v').textContent=
+    (s.loaded&&s.total)?(fmt(s.loaded)+' / '+fmt(s.total)):(s.text||'');
+}
+function bootFail(e){
+  document.getElementById('booterr').style.display='block';
+  document.getElementById('booterr').textContent='加载失败：'+(e&&e.message?e.message:e);
+  document.querySelector('.boottitle').textContent='环境没能加载起来';
+}
+
+/* ══════════ 通过瘦代理调大模型 ══════════ */
+async function callLLM(messages,opts,onDelta){
+  opts=opts||{};
+  var resp=await fetch('/api/llm',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({client:CLIENT,messages:messages,purpose:opts.purpose||'chat',
+      character:opts.character||'',temperature:opts.temperature===undefined?0.8:opts.temperature,
+      max_tokens:opts.max_tokens||800})});
+  if(!resp.ok){
+    var d=await resp.json().catch(function(){return {};});
+    var err=new Error(d.message||('HTTP '+resp.status));
+    if(d.code==='msg_limit'){err.limit=true;askPasscode(d);}
+    throw err;
+  }
+  var reader=resp.body.getReader(),dec=new TextDecoder('utf-8'),buf='',full='';
+  for(;;){
+    var r=await reader.read(); if(r.done)break;
+    buf+=dec.decode(r.value,{stream:true});
+    var parts=buf.split('\n\n'); buf=parts.pop();
+    for(var i=0;i<parts.length;i++){
+      var ev='message',data='';
+      parts[i].split('\n').forEach(function(ln){
+        if(ln.indexOf('event: ')===0)ev=ln.slice(7).trim();
+        else if(ln.indexOf('data: ')===0)data+=ln.slice(6);});
+      if(!data)continue;
+      if(data==='[DONE]')continue;
+      var o=JSON.parse(data);
+      // 兼容两种格式：本地 Python 服务端的 {text} 和 DeepSeek 原生的 {choices[].delta.content}
+      var piece=null;
+      if(ev==='delta')piece=o.text;
+      else if(o.choices&&o.choices[0]&&o.choices[0].delta)piece=o.choices[0].delta.content;
+      if(piece){full+=piece; if(onDelta)onDelta(piece);}
+      else if(ev==='error'){throw new Error(o.message);}
+    }
+  }
+  return full;
+}
+
+/* ══════════ 角色 ══════════ */
+function renderCast(){
+  var box=document.getElementById('cast');
+  Array.prototype.forEach.call(box.children,function(b){
+    var n=b.dataset.n,locked=STATES[n]==='locked',mark;
+    if(!locked) mark=ROSTER[n];
+    else if(HAS_CARD[n]) mark='<span class="lock free">🔓</span>';
+    else mark='<span class="lock">🔒</span>';
+    b.innerHTML='<span>'+esc(n)+'</span><em>'+mark+'</em>';
+  });
+}
+function switchTo(n){
+  if(busy||!n||n===current)return;
+  current=n;turns=[];FLOW.innerHTML='';
+  Array.prototype.forEach.call(document.querySelectorAll('.cast'),function(x){
+    x.setAttribute('aria-pressed',String(x.dataset.n===n));});
+  updateHint();
+  personaOf(n).then(function(p){intro(p);note('对话从这里开始。');});
+  MSG.focus();
+}
+async function personaOf(name){
+  /* 顺序：本地静态文件（手写）→ 本机缓存 → 服务端缓存 */
+  var p=RAG.personaOf(name);
+  if(p&&p.persona)return p;
+  try{var c=localStorage.getItem('persona:'+name); if(c)return JSON.parse(c);}catch(e){}
+  try{
+    var r=await fetch('/api/persona?name='+encodeURIComponent(name));
+    var d=await r.json();
+    if(d&&d.persona){try{localStorage.setItem('persona:'+name,JSON.stringify(d.persona));}catch(e){}}
+    return (d&&d.persona)||p||{};
+  }catch(e){return p||{};}
+}
+function intro(p){
+  var d=document.createElement('div');d.className='intro beat';
+  d.innerHTML='<div class="iname">'+esc(current)+'</div>'+
+    '<div class="note">'+esc(p.title||'')+'</div>'+
+    (p.persona?'<div class="ipersona">'+esc(p.persona)+'</div>':'')+
+    (p.style?'<div class="istyle">说话风格　'+esc(p.style)+'</div>':'');
+  FLOW.appendChild(d);down();
+}
+function addMine(t){var d=document.createElement('div');d.className='mine beat';
+  var p=document.createElement('p');p.textContent=t;d.appendChild(p);FLOW.appendChild(d);down();return d;}
+function addSaid(){var d=document.createElement('div');d.className='said beat';
+  var w=document.createElement('span');w.className='who';w.textContent=current;
+  var l=document.createElement('div');l.className='line pending';l.textContent='正在思索';
+  d.appendChild(w);d.appendChild(l);FLOW.appendChild(d);down();return{beat:d,line:l};}
+function addTrace(beat,m){
+  var box=document.createElement('div');box.className='trace';
+  var btn=document.createElement('button');btn.className='ttoggle';btn.type='button';
+  btn.setAttribute('aria-expanded','false');btn.textContent='过程记录';
+  var body=document.createElement('div');body.className='tbody';
+  var rows=m.voices.map(function(v){return '<div class="trow"><b>'+v.distance.toFixed(3)+'</b>'+
+    '<span>'+esc(v.quote)+'</span></div>';}).join('');
+  body.innerHTML='<span class="tl">改写后的检索式</span><div class="tq">'+esc(m.query)+'</div>'+
+    '<span class="tl">检索到的原话（在你这台机器上算出来的）</span>'+rows+
+    '<div class="tfoot">剧情原文 '+m.plot_count+' 段　prompt '+m.prompt_chars+' 字　检索耗时 '+m.elapsed_ms+' ms</div>';
+  btn.onclick=function(){var on=box.classList.toggle('on');
+    btn.setAttribute('aria-expanded',String(on));body.style.display=on?'block':'none';};
+  box.appendChild(btn);box.appendChild(body);beat.appendChild(box);
+}
+
+/* ══════════ 配额 ══════════ */
+function updateHint(){
+  var NL=CAST.filter(function(n){return STATES[n]==='locked';}).length;
+  var used=(QUOTA.msgs&&QUOTA.msgs[current])||0;
+  HINT.textContent='正在与 '+current+' 对话，已用 '+used+'/'+QUOTA.msg_limit+' 条。'
+    +(QUOTA.unlimited?'额度限制已解除':('带 🔒 的 '+NL+' 位需要先生成角色卡，还能生成 '+
+      (QUOTA.unlock_limit-(QUOTA.spent||0))+' 张。检索在你本机完成。'));
+}
+function refreshQuota(){
+  return fetch('/api/quota?client='+encodeURIComponent(CLIENT)).then(function(r){return r.json();})
+    .then(function(q){QUOTA=q;updateHint();}).catch(function(){});
+}
+function askPasscode(d){
+  document.getElementById('pmsg').textContent=((d&&d.message)?d.message+'。':'')+
+    '输入口令后可不受额度限制继续使用。';
+  document.getElementById('perr').textContent='';
+  document.getElementById('pcode').value='';
+  document.getElementById('mask2').hidden=false;
+  document.getElementById('pcode').focus();
+}
+function closePass(){document.getElementById('mask2').hidden=true;MSG.focus();}
+function doAuth(){
+  var code=(document.getElementById('pcode').value||'').trim();
+  var yes=document.getElementById('pyes'),no=document.getElementById('pno');
+  if(!code){document.getElementById('perr').textContent='请输入口令';return;}
+  yes.disabled=true;no.disabled=true;yes.textContent='验证中';
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({client:CLIENT,code:code})})
+   .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+   .then(function(res){
+     yes.disabled=false;no.disabled=false;yes.textContent='确认';
+     if(!res.ok||!res.d.ok){document.getElementById('perr').textContent=res.d.error||'口令不正确';return;}
+     QUOTA.unlimited=true;closePass();updateHint();note('口令正确，额度限制已解除。');
+     if(PENDING_SEND){var ps=PENDING_SEND;PENDING_SEND=null;
+       if(ps.mine&&ps.mine.parentNode)ps.mine.parentNode.removeChild(ps.mine);
+       if(ps.said&&ps.said.parentNode)ps.said.parentNode.removeChild(ps.said);
+       MSG.value=ps.text;send();}
+   }).catch(function(e){yes.disabled=false;no.disabled=false;yes.textContent='确认';
+     document.getElementById('perr').textContent='连不上服务：'+e.message;});
+}
+function askGenerate(n){
+  PENDING=n;var lines=ROSTER[n]||0,has=!!HAS_CARD[n];
+  document.getElementById('dt').textContent=(has?'解锁':'生成')+'「'+n+'」的角色卡';
+  document.getElementById('db').textContent=has
+    ? '这一位已经准备好角色卡了。解锁后即可直接对话。'
+    : '这一位还没有角色卡。需要先从原著里抽出这个角色说过的台词，交给大模型写出一份扮演设定。';
+  document.getElementById('dn').textContent=has
+    ? '解锁不调用大模型，不消耗额度。'
+    : ('全书共有 '+lines+' 条台词可抽取。生成后会缓存在本地，之后再点开不再消耗额度。');
+  document.getElementById('dyes').textContent=has?'解锁':'生成角色卡';
+  document.getElementById('mask').hidden=false;
+  document.getElementById('dyes').focus();
+}
+function closeDialog(){document.getElementById('mask').hidden=true;MSG.focus();}
+function doGenerate(){
+  var n=PENDING,yes=document.getElementById('dyes'),no=document.getElementById('dno');
+  yes.disabled=true;no.disabled=true;yes.textContent='处理中';
+  // 台词样本在浏览器本地抽好传上去 —— 后端不用存整本小说
+  var samples='';
+  try{ samples=RAG.sampleQuotes(n,14).map(function(s,i){return (i+1)+'. '+s;}).join('\n\n'); }catch(e){}
+  fetch('/api/persona',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({client:CLIENT,name:n,samples:samples})})
+   .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+   .then(function(res){
+     var d=res.d;
+     yes.disabled=false;no.disabled=false;yes.textContent='生成角色卡';
+     if(!res.ok&&d.code==='unlock_limit'){closeDialog();askPasscode(d);return;}
+     if(!res.ok){document.getElementById('db').textContent='失败：'+(d.message||'');return;}
+     STATES[n]='cached';HAS_CARD[n]=true;renderCast();closeDialog();
+     if(d.persona){try{localStorage.setItem('persona:'+n,JSON.stringify(d.persona));}catch(e){}}
+     if(d.spent!==undefined)QUOTA.spent=d.spent;switchTo(n);
+   }).catch(function(e){yes.disabled=false;no.disabled=false;yes.textContent='生成角色卡';
+     document.getElementById('db').textContent='连不上服务：'+e.message;});
+}
+function pick(n){
+  if(busy||!n)return;
+  if(STATES[n]==='locked'){askGenerate(n);return;}
+  switchTo(n);
+}
+
+/* ══════════ 发送 ══════════ */
+function send(){
+  var text=(MSG.value||'').trim(); if(!text||busy||!RAG.ready())return;
+  busy=true;SEND.disabled=true;MSG.value='';autoGrow();
+  var mineEl=addMine(text),cell=addSaid(),reply='',started=false;
+  var t0=performance.now();
+
+  (async function(){
+    try{
+      /* ① 改写查询：有历史才做，代词消解靠这一步 */
+      var q=text;
+      if(turns.length){
+        cell.line.textContent='正在结合上下文理解你的话';
+        q=(await callLLM([{role:'user',content:RAG.rewritePrompt(turns,text)}],
+            {purpose:'rewrite',temperature:0,max_tokens:100})).trim().replace(/^["“]|["”]$/g,'')||text;
+      }
+      /* ② 检索：本地嵌入 + 本地余弦检索 */
+      cell.line.textContent='正在原著里找他/她说过的话';
+      var qv=await RAG.embed(q);
+      var voices=RAG.searchVoices(current,qv,4);
+      var plot=RAG.searchPlot(qv,3);
+      var ms=Math.round(performance.now()-t0);
+      /* ③ 组装 prompt 并生成 */
+      var p=await personaOf(current);
+      var msgs=RAG.buildMessages(current,text,turns,voices,plot);
+      var promptChars=msgs.reduce(function(a,m){return a+m.content.length;},0);
+      addTrace(cell.beat,{query:q,voices:voices,plot_count:plot.length,
+        prompt_chars:promptChars,elapsed_ms:ms});
+      cell.line.textContent='正在组织语言';
+      await callLLM(msgs,{purpose:'chat',character:current,temperature:0.8,max_tokens:800},
+        function(piece){
+          if(!started){started=true;cell.line.textContent='';cell.line.classList.remove('pending');}
+          reply+=piece;cell.line.textContent=reply;down();
+        });
+    }catch(e){
+      cell.line.classList.remove('pending');
+      busy=false;SEND.disabled=false;
+      if(e.limit){cell.line.textContent='额度已用尽。';
+        PENDING_SEND={text:text,mine:mineEl,said:cell.beat};return;}
+      cell.line.textContent='出了点问题：'+e.message;return;
+    }
+    cell.line.classList.remove('pending');
+    if(!started)cell.line.textContent='这次没说出话来，可以再试一次。';
+    else{turns.push({role:'user',content:text});turns.push({role:'assistant',content:reply});}
+    busy=false;SEND.disabled=false;MSG.focus();
+    if(!QUOTA.unlimited){QUOTA.msgs[current]=(QUOTA.msgs[current]||0)+1;updateHint();refreshQuota();}
+  })();
+}
+function autoGrow(){MSG.style.height='auto';MSG.style.height=Math.min(MSG.scrollHeight,200)+'px';}
+
+/* ══════════ 启动 ══════════ */
+(async function boot(){
+  try{
+    await RAG.init(onStage);
+    ROSTER=RAG.roster(); CAST=RAG.characters(); current=CAST[0];
+    var ps=await fetch('/api/persona-states?client='+encodeURIComponent(CLIENT))
+      .then(function(r){return r.json();});
+    STATES=ps.states||{}; HAS_CARD=ps.has_card||{};
+    for(var i=0;i<CAST.length;i++){ if(STATES[CAST[i]]!=='locked'){current=CAST[i];break;} }
+
+    var box=document.getElementById('cast'); box.innerHTML='';
+    CAST.forEach(function(c){
+      var b=document.createElement('button');b.className='cast';b.dataset.n=c;
+      b.setAttribute('aria-pressed',String(c===current));
+      b.onclick=function(){pick(c);}; box.appendChild(b);
+    });
+    renderCast();
+    document.getElementById('roster').innerHTML=CAST.map(function(n){
+      return '<option value="'+n+'">'+ROSTER[n]+' 条台词</option>';}).join('');
+    document.getElementById('cgo').onclick=function(){
+      var v=(document.getElementById('cname').value||'').trim();if(!v)return;
+      if(CAST.indexOf(v)<0){note('没有「'+v+'」这个角色。',true);return;} pick(v);};
+
+    await refreshQuota();
+    var p=await personaOf(current); intro(p); note('对话从这里开始。检索在你本机完成。');
+    MSG.placeholder='对'+current+'说点什么…';
+    MSG.addEventListener('input',autoGrow);
+    MSG.addEventListener('keydown',function(e){
+      if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+    SEND.onclick=send;
+    document.getElementById('dno').onclick=closeDialog;
+    document.getElementById('dyes').onclick=doGenerate;
+    document.getElementById('mask').onclick=function(e){if(e.target===this)closeDialog();};
+    document.getElementById('pno').onclick=closePass;
+    document.getElementById('pyes').onclick=doAuth;
+    document.getElementById('pcode').addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();doAuth();}});
+    document.getElementById('mask2').onclick=function(e){if(e.target===this)closePass();};
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){closeDialog();closePass();}});
+
+    bootBox.classList.add('gone');
+    setTimeout(function(){bootBox.style.display='none';},600);
+    MSG.focus();
+  }catch(e){ bootFail(e); }
+})();
+
+</script>
+</body>
+</html>

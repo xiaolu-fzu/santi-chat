@@ -1,0 +1,12 @@
+name = "santi-chat"
+compatibility_date = "2025-09-01"
+
+# 只发布 dist/，不要把仓库根目录整个当静态站 ——
+# 否则 functions/、wrangler.toml、.dev.vars 都会被公开访问。
+# Cloudflare 上构建命令填：
+#   mkdir -p dist && cp -r index.html chat.html char_demo.js fonts ragdata dist/
+pages_build_output_dir = "dist"
+
+[[kv_namespaces]]
+binding = "SANTI"
+id = "REPLACE_WITH_YOUR_KV_ID"

@@ -1,0 +1,9 @@
+# 本地 wrangler 缓存
+.wrangler/
+node_modules/
+dist/
+.dev.vars
+
+# 系统
+Thumbs.db
+.DS_Store

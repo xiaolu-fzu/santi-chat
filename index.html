@@ -1,0 +1,279 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>《三体》人物对话 · 过程记录</title>
+<link rel="stylesheet" href="fonts/noto-sans-sc.css">
+<link rel="stylesheet" href="fonts/jetbrains-mono.css">
+<style>
+:root{
+  /* 配色不变，只把「面」拉开层次，让卡片能浮起来 */
+  --bg:#08090b; --surface:#15181e; --surface-2:#1d2129;
+  --line:#262b33; --line-2:#363c46;
+  --ink:#eceff4; --ink-2:#a2abba; --ink-3:#7d8796;
+  --accent:#5ec8d8; --accent-soft:rgba(94,200,216,.14);
+  --ui:"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --t-meta:12px; --t-label:15px; --t-body:19px; --t-lead:24px; --t-title:30px;
+  /* 圆角三档，全程只用这三档 */
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  /* 阴影带冷色调，不是纯黑 */
+  --sh-1:0 2px 6px rgba(0,4,10,.5);
+  --sh-2:0 10px 28px rgba(0,4,10,.45);
+  --sh-3:0 16px 44px rgba(0,4,10,.5);
+}
+*{box-sizing:border-box}
+::selection{background:var(--accent-soft)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:var(--r-sm)}
+*::-webkit-scrollbar{width:11px}
+*::-webkit-scrollbar-thumb{background:#2f353f;border-radius:6px}
+*::-webkit-scrollbar-thumb:hover{background:#414956}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:400 var(--t-body)/1.8 var(--ui);-webkit-font-smoothing:antialiased}
+.page{max-width:900px;margin:0 auto;padding:76px 48px 130px}
+
+/* ── 页头 ── */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;
+  padding-bottom:26px;margin-bottom:34px;border-bottom:1px solid var(--line)}
+h1{font-size:var(--t-title);font-weight:700;line-height:1.25;margin:0;letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--accent)}
+.topmeta{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);letter-spacing:.04em}
+.lede{font-size:var(--t-body);line-height:1.9;color:var(--ink-2);margin:0 0 44px;max-width:34em}
+.lede b{color:var(--ink);font-weight:600}
+
+/* ── 工作流程：浮起来的卡片 ── */
+.flowwrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:28px 30px 24px;box-shadow:var(--sh-2);margin-bottom:16px}
+.flowlab{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
+  letter-spacing:.1em;display:block;margin-bottom:22px}
+#flow{display:block;width:100%;height:auto}
+#flow .bx{fill:var(--surface-2);stroke:var(--line-2);stroke-width:1}
+#flow .bx.hi{fill:var(--accent-soft);stroke:var(--accent)}
+#flow .bt{fill:var(--ink-2);font-size:12.5px;font-family:var(--ui);text-anchor:middle}
+#flow .bt.hi{fill:var(--accent)}
+#flow .ln{stroke:var(--line-2);stroke-width:1;fill:none}
+.flowcap{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
+  line-height:1.9;margin:0 0 92px}
+
+/* ── 区块标题：两侧带横线（学你参考页的做法）── */
+h2{display:flex;align-items:center;gap:16px;font-size:var(--t-lead);font-weight:700;
+  line-height:1.35;margin:0 0 26px;letter-spacing:-.005em}
+h2::before,h2::after{content:"";height:2px;background:var(--line-2);flex:none;width:34px}
+h2::after{flex:1}
+section{margin-bottom:96px}
+
+/* ── 角色索引 ── */
+#tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:38px}
+.tab{background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  color:var(--ink-2);font:500 var(--t-label)/1 var(--ui);padding:11px 20px;cursor:pointer;
+  transition:background .16s,border-color .16s,color .16s,transform .1s}
+.tab:hover{background:var(--surface-2);color:var(--ink);border-color:var(--line-2)}
+.tab:active{transform:scale(.97)}
+.tab[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+
+/* ── 角色头 ── */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden;box-shadow:var(--sh-2)}
+.cardtop{padding:28px 30px 24px}
+.dname{font-size:var(--t-lead);font-weight:700;line-height:1.3}
+.dtitle{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
+  margin-top:9px;letter-spacing:.04em}
+.persona{font-size:var(--t-body);line-height:1.9;color:var(--ink-2);margin:22px 0 0;max-width:34em}
+.volrow{display:flex;align-items:center;gap:16px;padding:20px 30px;
+  border-top:1px solid var(--line)}
+.volrow .k{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);flex:none;width:82px}
+.volrow .bar{flex:1;height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.volrow .bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.volrow .v{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-2);flex:none;width:56px;text-align:right}
+.dmeta{padding:20px 30px 26px;font-size:var(--t-label);line-height:1.9;color:var(--ink-3);
+  border-top:1px solid var(--line)}
+.dmeta em{font-style:normal;color:var(--ink-2);font-weight:500}
+
+/* ── 每一轮 ── */
+.turn{padding:40px 0 0}
+.ask{display:flex;gap:14px;align-items:baseline;margin:0 0 30px;
+  padding:18px 22px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-md);box-shadow:var(--sh-1)}
+.ask i{font-style:normal;font-size:var(--t-meta);font-family:var(--mono);color:var(--accent);
+  flex:none;letter-spacing:.1em}
+.ask span{font-size:var(--t-body);line-height:1.7;font-weight:500}
+
+.steps{position:relative;padding-left:28px}
+.steps::before{content:"";position:absolute;left:5px;top:10px;bottom:14px;width:1px;background:var(--line-2)}
+.step{position:relative;margin-bottom:32px}
+.step::before{content:"";position:absolute;left:-28px;top:8px;width:11px;height:11px;
+  border-radius:50%;background:var(--bg);border:1.5px solid var(--line-2)}
+.step.hi::before{border-color:var(--accent);background:var(--accent)}
+.slabel{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.slabel b{font-weight:600;font-size:var(--t-label);color:var(--ink)}
+.step.hi .slabel b{color:var(--accent)}
+.slabel em{font-style:normal;font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3)}
+
+.rewrite{font-size:var(--t-label);line-height:1.8;color:var(--ink-2)}
+.rewrite .to{color:var(--accent);font-weight:600}
+.rewrite .ar{color:var(--ink-3);font-family:var(--mono);padding:0 11px}
+.rewrite .no{color:var(--ink-3)}
+
+/* 检索结果表 */
+table.hits{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+table.hits td{padding:14px 16px;border-bottom:1px solid var(--line);
+  font-size:var(--t-label);line-height:1.7;color:var(--ink-2);vertical-align:top}
+table.hits tr:last-child td{border-bottom:0}
+table.hits td.n{width:58px;font-family:var(--mono);font-size:var(--t-meta);color:var(--ink-3);
+  padding-top:16px}
+table.hits td.g{width:124px;padding-top:18px}
+.sim{display:block;height:7px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.sim i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.reply{font-size:var(--t-body);line-height:1.9;white-space:pre-wrap;color:var(--ink)}
+.dataline{font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3);
+  margin-top:14px;line-height:1.8}
+
+/* ── 同题异答 ── */
+#crossbox{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cross{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;box-shadow:var(--sh-1)}
+.cross:last-child:nth-child(odd){grid-column:1 / -1}
+.cross .cn{display:flex;align-items:baseline;gap:11px;margin-bottom:14px}
+.cross .cn b{font-weight:700;font-size:var(--t-label);color:var(--accent);letter-spacing:.02em}
+.cross .cn u{text-decoration:none;font-size:var(--t-meta);font-family:var(--mono);color:var(--ink-3)}
+.cross p{margin:0;font-size:var(--t-label);line-height:1.9;color:var(--ink-2)}
+
+footer{border-top:1px solid var(--line);padding-top:28px;
+  font-size:var(--t-meta);line-height:2.1;color:var(--ink-3)}
+footer code{font-family:var(--mono);color:var(--ink-2)}
+@media (max-width:780px){
+  .page{padding:40px 20px 80px}
+  #crossbox{grid-template-columns:1fr}
+  table.hits td.g{width:74px}
+  .ask{flex-direction:column;gap:7px}
+  h2::before{display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <h1>《三体》<em>人物对话</em></h1>
+    <div class="topmeta" id="topmeta"></div>
+  </div>
+  <p class="lede">让模型扮演小说角色，难的不是像不像，而是<b>它凭什么这么说话</b>。下面每一轮都摊开三件事：问题怎么被改写、检索到了哪些原话、以及最终的回答。</p>
+
+  <div class="flowwrap">
+    <span class="flowlab">工作流程：</span>
+    <svg id="flow" viewBox="0 0 616 132" role="img" aria-label="工作流程：对话历史进入改写问题，改写后的问题分别检索原话与剧情，两者汇入组装 prompt，最后生成回答">
+<defs><marker id="ah" markerWidth="6" markerHeight="6" refX="5.5" refY="3" orient="auto">
+<path d="M0,0 L6,3 L0,6 z" fill="#31363e"/></marker></defs>
+<path class="ln" d="M88,66 H118" marker-end="url(#ah)"/><path class="ln" d="M212,66 H230 V26 H242" marker-end="url(#ah)"/><path class="ln" d="M230,66 V106 H242" marker-end="url(#ah)"/><path class="ln" d="M336,26 H354 V66 H366" marker-end="url(#ah)"/><path class="ln" d="M336,106 H354 V66" marker-end="url(#ah)"/><path class="ln" d="M490,66 H520" marker-end="url(#ah)"/><rect class="bx" x="0" y="46" width="88" height="40" rx="3"/><text class="bt" x="44" y="70.5">对话历史</text><rect class="bx hi" x="124" y="46" width="88" height="40" rx="3"/><text class="bt hi" x="168" y="70.5">改写问题</text><rect class="bx hi" x="248" y="6" width="88" height="40" rx="3"/><text class="bt hi" x="292" y="30.5">检索原话</text><rect class="bx" x="248" y="86" width="88" height="40" rx="3"/><text class="bt" x="292" y="110.5">检索剧情</text><rect class="bx" x="372" y="46" width="118" height="40" rx="3"/><text class="bt" x="431" y="70.5">组装 prompt</text><rect class="bx" x="526" y="46" width="90" height="40" rx="3"/><text class="bt" x="571" y="70.5">生成回答</text></svg>
+  </div>
+  <p class="flowcap">青色两步是会调用大模型的地方；其余步骤都在本机完成。</p>
+
+  <section>
+    <h2>一位一位地看</h2>
+    <div id="tabs"></div>
+    <div id="detail"></div>
+  </section>
+
+  <section>
+    <h2>同一个问题，问遍所有人</h2>
+    <p class="lede" style="margin-bottom:24px">问的是同一句话：<b id="crossq"></b><span id="crossend"></span>差别全部来自角色本身，这正是人设与原话检索起作用的地方。</p>
+    <div id="crossbox"></div>
+  </section>
+
+  <footer>
+    本页对话是预先计算并固化的快照，打开不消耗额度，也不需要后端。<br>
+    检索环节全在本机完成，只有最终生成调用一次大模型。<br>
+    实时版本见 <code>web/chat.html</code>，数据生成于 <code id="gen"></code>
+  </footer>
+</div>
+<script src="char_demo.js"></script>
+<script>
+document.getElementById('gen').textContent=(window.CHAR_DEMO&&window.CHAR_DEMO.meta.generated_at)||'';
+
+var D=window.CHAR_DEMO, ROSTER={"罗辑":455,"程心":265,"史强":246,"汪淼":230,"章北海":157,"智子":134,"雷迪亚兹":126,"关一帆":120,"AA":114,"丁仪":107,"希恩斯":100,"叶文洁":91,"维德":70,"泰勒":62,"常伟思":60,"东方延绪":48,"云天明":45,"庄颜":42,"潘寒":27,"白沐霖":19,"杨晋文":19,"张援朝":19,"杨卫宁":15,"杨冬":13,"叶哲泰":12,"魏成":9,"苗福全":9,"沙瑞山":8,"申玉菲":6,"绍琳":6,"歌者":6};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+if(!D){document.getElementById('detail').innerHTML='<p>缺少 char_demo.js</p>';}
+else{
+  var names=D.meta.characters, cur=names[0];
+  var MAXV=Math.max.apply(null,names.map(function(n){return ROSTER[n]||0;}));
+  var total=names.reduce(function(a,n){return a+D.characters[n].turns.length;},0);
+  document.getElementById('topmeta').textContent=names.length+' 位角色　'+total+' 轮预置对话　'+D.meta.generated_at;
+
+  var tabs=document.getElementById('tabs');
+  names.forEach(function(n){
+    var b=document.createElement('button');b.className='tab';b.textContent=n;
+    b.setAttribute('aria-pressed',String(n===cur));
+    b.onclick=function(){cur=n;
+      Array.prototype.forEach.call(tabs.children,function(x){
+        x.setAttribute('aria-pressed',String(x.textContent===n));});
+      render();};
+    tabs.appendChild(b);
+  });
+
+  function render(){
+    var c=D.characters[cur], h='';
+    var v=ROSTER[cur]||0;
+    h+='<div class="card">';
+    h+='<div class="cardtop"><div class="dname">'+esc(cur)+'</div>'+
+       '<div class="dtitle">'+esc(c.title)+'</div>'+
+       '<p class="persona">'+esc(c.persona)+'</p></div>';
+    /* 台词量：横向条形，真实数据 */
+    h+='<div class="volrow"><span class="k">原著台词</span>'+
+       '<span class="bar"><i style="width:'+Math.round(v/MAXV*100)+'%"></i></span>'+
+       '<span class="v">'+v+' 条</span></div>';
+    h+='<div class="dmeta"><em>说话风格</em>　'+esc(c.style)+'<br><em>时间线边界</em>　'+esc(c.cutoff)+'</div>';
+    h+='</div>';
+
+    c.turns.forEach(function(t){
+      var rw=t.query&&t.query!==t.user;
+      h+='<div class="turn"><p class="ask"><i>问</i><span>'+esc(t.user)+'</span></p>';
+      h+='<div class="steps">';
+      /* ① 改写问题 */
+      h+='<div class="step'+(rw?' hi':'')+'"><div class="slabel"><b>改写问题</b><em>'+
+         (rw?'代词已被解析':'首轮，没有历史可依')+'</em></div>'+
+         '<div class="rewrite"><span>'+esc(t.user)+'</span><span class="ar">&rarr;</span>'+
+         (rw?'<span class="to">'+esc(t.query)+'</span>':'<span class="no">原样检索</span>')+'</div></div>';
+      /* ② 检索原话：带框的数据表 + 相似度条 */
+      /* 余弦距离在一轮内挤得很近（如 0.42~0.46），直接当宽度画出来几乎一样长。
+         所以按本轮命中做相对归一化：最贴近的给满格，最远的给 35%，差值才看得出来。 */
+      var ds=t.voices.map(function(x){return x.distance;});
+      var dMin=Math.min.apply(null,ds), dMax=Math.max.apply(null,ds);
+      var rows=t.voices.map(function(x){
+        var rel=(dMax-dMin)<1e-6?1:1-(x.distance-dMin)/(dMax-dMin);
+        var w=Math.round((0.35+0.65*rel)*100);
+        return '<tr><td class="n">'+(x.distance.toFixed(3))+'</td>'+
+               '<td class="g"><span class="sim"><i style="width:'+w+'%"></i></span></td>'+
+               '<td>'+esc(x.quote)+'</td></tr>';
+      }).join('');
+      h+='<div class="step hi"><div class="slabel"><b>检索原话</b><em>'+t.voices.length+
+         ' 条命中，另有 '+t.plot_count+' 段剧情原文</em></div>'+
+         '<table class="hits">'+rows+'</table>'+
+         '<div class="dataline">左侧数值为余弦距离（越小越贴近）；条形是本轮 '+t.voices.length+
+         ' 条命中之间的相对长度</div></div>';
+      /* ③ 生成回答 */
+      h+='<div class="step"><div class="slabel"><b>生成回答</b><em>prompt '+t.prompt_chars+
+         ' 字　用时 '+t.elapsed_ms+' ms</em></div>'+
+         '<div class="reply">'+esc(t.reply)+'</div></div>';
+      h+='</div></div>';
+    });
+    document.getElementById('detail').innerHTML=h;
+  }
+  render();
+
+  if(D.cross){
+    var q=D.cross.question;
+    document.getElementById('crossq').textContent=q;
+    // 问句本身已带问号时不再补句号，避免出现「？」。这种重复标点
+    document.getElementById('crossend').textContent=/[。！？!?]$/.test(q)?'':'。';
+    document.getElementById('crossbox').innerHTML=D.cross.answers.map(function(a){
+      return '<div class="cross"><div class="cn"><b>'+esc(a.character)+'</b>'+
+             '<u>'+(ROSTER[a.character]||0)+' 条台词</u></div>'+
+             '<p>'+esc(a.reply)+'</p></div>';
+    }).join('');
+  }
+}
+
+</script>
+</body>
+</html>
