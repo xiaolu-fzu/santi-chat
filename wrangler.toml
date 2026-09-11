@@ -9,4 +9,4 @@ pages_build_output_dir = "dist"
 
 [[kv_namespaces]]
 binding = "SANTI"
-id = "REPLACE_WITH_YOUR_KV_ID"
+id = "40ca61a972954313ade56624466c9b8a"
