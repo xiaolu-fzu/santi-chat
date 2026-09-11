@@ -1,4 +1,4 @@
-# 本地开发用（wrangler pages dev 会读这个文件）
-# 复制成 .dev.vars 后填入真实值，.dev.vars 已在 .gitignore 里，不会被提交
-DEEPSEEK_API_KEY=sk-替换成你的
+# Local dev only. wrangler pages dev reads this file.
+# Copy to .dev.vars and fill in real values. .dev.vars is gitignored.
+DEEPSEEK_API_KEY=sk-REPLACE_ME
 ACCESS_CODE=LJH
