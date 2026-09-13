@@ -9,13 +9,23 @@
 $ErrorActionPreference = 'Continue'
 $RAG = Join-Path (Split-Path $PSScriptRoot -Parent) 'RAG'
 if (-not (Test-Path $RAG)) { Write-Host "RAG dir not found: $RAG" -ForegroundColor Red; exit 1 }
+# Source root: the santi subproject. The RAG tree was reorganised into
+# santi/ + nianbao/ + shared root, so these used to be RAG\web and RAG\demo.
+# Guard below makes a future move fail loudly instead of silently syncing nothing.
+$SRC = Join-Path $RAG 'santi'
+if (-not (Test-Path $SRC)) { Write-Host "santi source dir not found: $SRC" -ForegroundColor Red; exit 1 }
+foreach ($d in @('web','demo')) {
+    if (-not (Test-Path (Join-Path $SRC $d))) {
+        Write-Host "missing source subdir: $SRC\$d" -ForegroundColor Red; exit 1
+    }
+}
 $ROOT = $PSScriptRoot
 
 Write-Host "== 1/5 fonts ==" -ForegroundColor Cyan
 $fx = Join-Path $ROOT 'fonts'
 New-Item -ItemType Directory -Force -Path $fx | Out-Null
 # noto-serif-sc is unused now (pages moved to sans-serif): do not publish it
-Get-ChildItem (Join-Path $RAG 'web\fonts') | Where-Object { $_.Name -notlike 'noto-serif-sc*' } | ForEach-Object {
+Get-ChildItem (Join-Path $SRC 'web\fonts') | Where-Object { $_.Name -notlike 'noto-serif-sc*' } | ForEach-Object {
     Copy-Item -Path $_.FullName -Destination $fx -Recurse -Force
 }
 Write-Host ("   {0} font chunks" -f (Get-ChildItem $fx -Recurse -File).Count)
@@ -24,17 +34,17 @@ Write-Host "== 2/5 ragdata ==" -ForegroundColor Cyan
 $rd = Join-Path $ROOT 'ragdata'
 if (Test-Path $rd) { Remove-Item $rd -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $rd | Out-Null
-Copy-Item -Path (Join-Path $RAG 'web\ragdata\*') -Destination $rd -Recurse -Force
+Copy-Item -Path (Join-Path $SRC 'web\ragdata\*') -Destination $rd -Recurse -Force
 Write-Host ("   ragdata {0} MB" -f [math]::Round(((Get-ChildItem $rd -Recurse -File | Measure-Object Length -Sum).Sum/1MB),2))
 
 Write-Host "== 3/5 chat page ==" -ForegroundColor Cyan
-Copy-Item -Path (Join-Path $RAG 'web\chat.html') -Destination (Join-Path $ROOT 'chat.html') -Force
+Copy-Item -Path (Join-Path $SRC 'web\chat.html') -Destination (Join-Path $ROOT 'chat.html') -Force
 
 Write-Host "== 4/5 showcase -> index.html ==" -ForegroundColor Cyan
-$show = Get-Content (Join-Path $RAG 'demo\characters.html') -Raw -Encoding UTF8
+$show = Get-Content (Join-Path $SRC 'demo\characters.html') -Raw -Encoding UTF8
 $show = $show -replace '\.\./web/fonts/', 'fonts/'
 Set-Content (Join-Path $ROOT 'index.html') $show -Encoding UTF8 -NoNewline
-Copy-Item -Path (Join-Path $RAG 'demo\char_demo.js') -Destination (Join-Path $ROOT 'char_demo.js') -Force
+Copy-Item -Path (Join-Path $SRC 'demo\char_demo.js') -Destination (Join-Path $ROOT 'char_demo.js') -Force
 
 Write-Host "== 5/5 check ==" -ForegroundColor Cyan
 $need = @('index.html','chat.html','char_demo.js','ragdata\rag-client.js','ragdata\manifest.json',

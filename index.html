@@ -157,11 +157,63 @@ footer{border-top:1px solid var(--line);padding-top:28px;
   font-size:var(--t-meta);line-height:2.1;color:var(--t4)}
 footer code{font-family:var(--mono);color:var(--t3)}
 @media (max-width:780px){
-  .page{padding:40px 20px 80px}
-  #crossbox{grid-template-columns:1fr}
+  .page{padding:44px 18px 80px}
+
+  /* 标题与正文按屏宽收一档 —— 30px 的标题在 390px 屏上会折成三行 */
+  h1{font-size:23px;line-height:1.35}
+  .topmeta{font-size:13px;margin-top:10px}
+  .lede{font-size:16px;line-height:1.85;margin-bottom:32px}
+
+  /* 区块标题两侧横线要【对称】：原来只隐藏了左边，
+     结果「一位一位地看」只剩右边一条线，看着像没画完 */
+  h2{font-size:20px;gap:12px;margin-bottom:22px}
+  h2::before,h2::after{width:22px}
+
+  /* 流程图是 SVG（viewBox 616x132），按 100% 宽缩放会小到看不清字。
+     改成给一个最小宽度 + 允许横向滑动 —— 宁可滑，也别缩到读不了。 */
+  .flowwrap{padding:18px 16px 14px}
+  .flowwrap .fsvg{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #flow{min-width:560px}
+  .flowlab{font-size:14px;margin-bottom:16px}
+
+  /* 检索结果表：手机上给一个最小宽度并允许横滑 */
+  .hitswrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.hits{min-width:520px}
   table.hits td.g{width:74px}
-  .ask{flex-direction:column;gap:7px}
-  h2::before{display:none}
+
+  .ask{flex-direction:column;align-items:flex-start;gap:9px;padding:16px 16px;margin-bottom:24px}
+  .qno{font-size:13px;padding:6px 13px}
+  .qtext{font-size:19px;line-height:1.45}
+
+  .cardtop{padding:20px 18px 18px}
+  .dname{font-size:21px}
+  .dtitle{font-size:14px;margin-top:8px}
+  .persona{font-size:16px;line-height:1.85;margin-top:16px}
+  .volrow{padding:15px 18px;gap:12px}
+  .volrow .k{width:64px;font-size:11px}
+  .volrow .v{width:56px;font-size:14px}
+  .dmeta,.dataline{font-size:11px;line-height:1.7}
+
+  .steps{padding-left:20px}
+  .steps::before{left:4px}
+  .step::before{left:-20px;top:7px;width:9px;height:9px}
+  .step.hi::before{width:11px;height:11px;left:-21px;top:6px}
+  .step{margin-bottom:24px}
+  .reply{font-size:17px;line-height:1.85}
+
+  #crossbox{grid-template-columns:1fr;gap:14px}
+  .cross{padding:18px 18px}
+  .cross p{font-size:15px;line-height:1.85}
+  .cross .cn b{font-size:14px;padding:5px 11px}
+
+  .tabs{gap:7px}
+  .tab{padding:8px 13px;font-size:14px}
+}
+
+@media (max-width:400px){
+  h1{font-size:21px}
+  .qtext{font-size:18px}
+  .reply{font-size:16px}
 }
 </style>
 </head>
@@ -175,10 +227,10 @@ footer code{font-family:var(--mono);color:var(--t3)}
 
   <div class="flowwrap">
     <span class="flowlab">工作流程：</span>
-    <svg id="flow" viewBox="0 0 616 132" role="img" aria-label="工作流程：对话历史进入改写问题，改写后的问题分别检索原话与剧情，两者汇入组装 prompt，最后生成回答">
+    <div class="fsvg"><svg id="flow" viewBox="0 0 616 132" role="img" aria-label="工作流程：对话历史进入改写问题，改写后的问题分别检索原话与剧情，两者汇入组装 prompt，最后生成回答">
 <defs><marker id="ah" markerWidth="6" markerHeight="6" refX="5.5" refY="3" orient="auto">
 <path d="M0,0 L6,3 L0,6 z" fill="#31363e"/></marker></defs>
-<path class="ln" d="M88,66 H118" marker-end="url(#ah)"/><path class="ln" d="M212,66 H230 V26 H242" marker-end="url(#ah)"/><path class="ln" d="M230,66 V106 H242" marker-end="url(#ah)"/><path class="ln" d="M336,26 H354 V66 H366" marker-end="url(#ah)"/><path class="ln" d="M336,106 H354 V66" marker-end="url(#ah)"/><path class="ln" d="M490,66 H520" marker-end="url(#ah)"/><rect class="bx" x="0" y="46" width="88" height="40" rx="3"/><text class="bt" x="44" y="70.5">对话历史</text><rect class="bx hi" x="124" y="46" width="88" height="40" rx="3"/><text class="bt hi" x="168" y="70.5">改写问题</text><rect class="bx hi" x="248" y="6" width="88" height="40" rx="3"/><text class="bt hi" x="292" y="30.5">检索原话</text><rect class="bx" x="248" y="86" width="88" height="40" rx="3"/><text class="bt" x="292" y="110.5">检索剧情</text><rect class="bx" x="372" y="46" width="118" height="40" rx="3"/><text class="bt" x="431" y="70.5">组装 prompt</text><rect class="bx" x="526" y="46" width="90" height="40" rx="3"/><text class="bt" x="571" y="70.5">生成回答</text></svg>
+<path class="ln" d="M88,66 H118" marker-end="url(#ah)"/><path class="ln" d="M212,66 H230 V26 H242" marker-end="url(#ah)"/><path class="ln" d="M230,66 V106 H242" marker-end="url(#ah)"/><path class="ln" d="M336,26 H354 V66 H366" marker-end="url(#ah)"/><path class="ln" d="M336,106 H354 V66" marker-end="url(#ah)"/><path class="ln" d="M490,66 H520" marker-end="url(#ah)"/><rect class="bx" x="0" y="46" width="88" height="40" rx="3"/><text class="bt" x="44" y="70.5">对话历史</text><rect class="bx hi" x="124" y="46" width="88" height="40" rx="3"/><text class="bt hi" x="168" y="70.5">改写问题</text><rect class="bx hi" x="248" y="6" width="88" height="40" rx="3"/><text class="bt hi" x="292" y="30.5">检索原话</text><rect class="bx" x="248" y="86" width="88" height="40" rx="3"/><text class="bt" x="292" y="110.5">检索剧情</text><rect class="bx" x="372" y="46" width="118" height="40" rx="3"/><text class="bt" x="431" y="70.5">组装 prompt</text><rect class="bx" x="526" y="46" width="90" height="40" rx="3"/><text class="bt" x="571" y="70.5">生成回答</text></svg></div>
   </div>
   <p class="flowcap">青色两步是会调用大模型的地方；其余步骤都在本机完成。</p>
 
@@ -262,7 +314,7 @@ else{
       }).join('');
       h+='<div class="step hi"><div class="slabel"><b>检索原话</b><em>'+t.voices.length+
          ' 条命中，另有 '+t.plot_count+' 段剧情原文</em></div>'+
-         '<table class="hits">'+rows+'</table>'+
+         '<div class="hitswrap"><table class="hits">'+rows+'</table></div>'+
          '<div class="dataline">左侧数值为余弦距离（越小越贴近）；条形是本轮 '+t.voices.length+
          ' 条命中之间的相对长度</div></div>';
       /* ③ 生成回答 */
