@@ -161,7 +161,8 @@ button:active{transform:scale(.97)}
 @media (max-width:880px){
   /* 竖屏下改成上下布局：上面角色栏，下面对话区。
      36vh 给角色栏 —— 角色卡是横向滚动的标签，不需要占满屏。 */
-  .shell{grid-template-columns:1fr;grid-template-rows:minmax(0,32vh) 1fr}
+  /* 角色栏给 38vh：要装下"标题 + 换人输入框 + 一行角色标签 + 角色卡" */
+  .shell{grid-template-columns:1fr;grid-template-rows:minmax(0,38vh) 1fr}
   .rail{border-right:0;border-bottom:1px solid var(--line);padding:14px 16px;gap:12px}
   .brand{font-size:17px}
   .brand span{font-size:11px}
@@ -172,7 +173,14 @@ button:active{transform:scale(.97)}
   #msg{font-size:16px}
   #send{padding:0 18px;font-size:15px}
   .intro{font-size:14px;line-height:1.8;padding:16px 16px}
-  .cast{padding:8px 13px;font-size:14px}
+  /* 角色列表：桌面版是【纵向】列在侧边栏里，手机上必须改成【横向】一行。
+     不改方向的话，竖列在 32vh 高的栏里只分到十几像素，31 个角色全被裁掉
+     —— 实测就是"看不到人物选择"。 */
+  #castwrap{flex:none;gap:8px}
+  #cast{flex:none;flex-direction:row;flex-wrap:nowrap;gap:7px;
+    overflow-x:auto;overflow-y:hidden;padding-bottom:5px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .cast{flex:none;white-space:nowrap;padding:7px 13px;font-size:14px;border:1px solid var(--line)}
   .cast em{display:none}          /* 台词条数在手机上省掉，标签本身更重要 */
   .line{font-size:17px;line-height:1.85}
   .who{font-size:13px;margin-bottom:5px}
@@ -187,7 +195,7 @@ button:active{transform:scale(.97)}
 }
 
 @media (max-width:400px){
-  .shell{grid-template-rows:minmax(0,28vh) 1fr}
+  .shell{grid-template-rows:minmax(0,36vh) 1fr}
   #feed{padding:14px 12px}
   .line{font-size:16px}
   .brand{font-size:16px}
